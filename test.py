@@ -1,6 +1,9 @@
 #!/usr/bin/env python
 
 from pymongo import Connection
+from pymongo import ASCENDING, DESCENDING
+
+import re
 import yaml
 import json
 import time
@@ -19,19 +22,23 @@ class Dummy(dict):
         self['type'] = random.choice(types)
         self['class'] = self.__class__.__name__
 
+        self.set_list()
         self.set_dimensions()
+
+    def set_list(self):
+        l = []
+        for i in range(5):
+            l.append(random.randint(0, 9999))
+
+        self['list'] = l
 
 # Set an embedded dict
     def set_dimensions(self):
         d = {}
-        d['x'] = random.randint(0, 10)
-        d['y'] = random.randint(0, 10)
+        d['x'] = random.randint(0, 9)
+        d['y'] = random.randint(0, 9)
 
         self['dimensions'] = d
-
-# Save to the DB
-    def save(self, clxn):
-        clxn.insert(self)
 
 # Get our config
 yamlpath = 'config/config.yaml'
@@ -57,9 +64,12 @@ c.drop()
 # Create and insert some of our objects
 for i in range(10):
     d = Dummy()
-    d.save(c)
+    c.insert(d)
 
-# Find all of the entries of type 'foo'
-d = c.find({'type': 'foo'})
+# Create an index
+c.create_index("ts", ASCENDING)
+
+d = c.find({'value': {'$gt': 75}})
+#d = c.find({'type': re.compile('ba')})
 for e in list(d):
     print e

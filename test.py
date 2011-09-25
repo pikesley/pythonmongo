@@ -17,7 +17,7 @@ class Dummy(dict):
         self['ts'] = time.time()
         self['value'] = random.randint(0, 99)
         self['type'] = random.choice(types)
-        self['class'] = self.__class__.__name__.lower()
+        self['class'] = self.__class__.__name__
 
         self.set_dimensions()
 

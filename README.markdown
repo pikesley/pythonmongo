@@ -9,3 +9,8 @@ MongoDB 2.0 and pymongo installation:
 * `apt-get update`
 * `apt-get install mongodb-10gen python-setuptools`
 * `easy_install pymongo`
+
+Tagaliser
+---------
+
+Indexes your (properly tsgged) mp3s/oggs in Mongo. Probably useful for something.

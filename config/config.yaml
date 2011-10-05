@@ -5,4 +5,8 @@ mongo:
   collection:   tracks
 
 paths:
+#  music:        /tomato/media/music/The Beatles/
+#  music:        /tomato/media/music/Amy Winehouse/2007-03-13 - Back to Black/
+#  music:        /tomato/media/music/Amy Winehouse/
   music:        /tomato/media/music/
+

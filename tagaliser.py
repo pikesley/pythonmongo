@@ -23,7 +23,7 @@ class Track(dict):
         self['md5'] = hashlib.md5(self['path']).hexdigest()
         self['file_type'] = self['path'].split('.')[-1]
 
-def populate(drop_first=True):
+def populate(drop_first=False):
     if drop_first:
         clxn.drop()
 
@@ -31,7 +31,10 @@ def populate(drop_first=True):
         for t in d[2]:
             if t.endswith("ogg") or t.endswith("mp3"):
                 track = Track(os.path.join(d[0], t))
-                clxn.insert(track)
+                if not len(list(clxn.find({'md5': '%s' % track['md5']}))) > 0:
+                    clxn.insert(track)
+                else:
+                    print "%s already exists" % track['path']
 
     t = clxn.find_one()
     for k in t.keys():
@@ -49,7 +52,7 @@ db = cnxn[d['db']]
 clxn = db[d['collection']]
 
 if __name__ == '__main__':
-    populate()
+    populate(False)
 #    t = clxn.find({'artist': 'The Beatles'})
 #   for x in list(t):
 #       print x

@@ -9,7 +9,8 @@ import os
 import re
 
 class Track(dict):
-    def __init__(self, path):
+    def __init__(self, path, verbose=False):
+        self.verbose = verbose
         self['path'] = path
         self.fileref = tagpy.FileRef(self['path'])
 
@@ -20,26 +21,43 @@ class Track(dict):
         self['title'] = self.tags.title
         self['album'] = self.tags.album
         self['year'] = self.tags.year
-        self['md5'] = hashlib.md5(self['path']).hexdigest()
+        self['_id'] = hashlib.md5(self['path']).hexdigest()
         self['file_type'] = self['path'].split('.')[-1]
+        self['full_name'] = '/'.join([self['artist'], self['album'], self['title']])
 
-def populate(drop_first=False):
+    def is_in(self, collection):
+        f = collection.find({'_id': self['_id']})
+        return len(list(f)) > 0
+
+    def store(self, collection):
+        if not self.is_in(collection):
+            if self.verbose: print "Storing '%s'" % self['full_name']
+            collection.insert(self)
+        else:
+            if self.verbose: print "'%s' already stored" % self['full_name']
+
+def populate(drop_first=False, music_path=None, verbose=None):
     if drop_first:
         clxn.drop()
 
-    for d in os.walk(y['paths']['music']):
+    if music_path:
+        mp = music_path
+    else:
+        mp = y['paths']['music']
+
+    for d in os.walk(mp):
         for t in d[2]:
             if t.endswith("ogg") or t.endswith("mp3"):
-                track = Track(os.path.join(d[0], t))
-                if not len(list(clxn.find({'md5': '%s' % track['md5']}))) > 0:
-                    clxn.insert(track)
-                else:
-                    print "%s already exists" % track['path']
+                track = Track(os.path.join(d[0], t), verbose)
+                track.store(clxn)
 
     t = clxn.find_one()
     for k in t.keys():
-        print "Creating index '%s'" % (k)
+        if verbose: print "Creating index '%s'" % (k)
         clxn.create_index(k)
+
+def purge:
+    pass
 
 yamlpath = 'config/config.yaml'
 f = open(yamlpath, 'r')
@@ -52,7 +70,10 @@ db = cnxn[d['db']]
 clxn = db[d['collection']]
 
 if __name__ == '__main__':
-    populate(False)
-#    t = clxn.find({'artist': 'The Beatles'})
-#   for x in list(t):
-#       print x
+    from options import options
+    if options.action == "update":
+        drop_first = False
+    if options.action == "scratch":
+        drop_first = True
+
+    populate(drop_first=drop_first, music_path=options.music_path, verbose=options.verbose)

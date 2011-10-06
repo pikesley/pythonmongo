@@ -24,6 +24,7 @@ class Track(dict):
         self['_id'] = hashlib.md5(self['path']).hexdigest()
         self['file_type'] = self['path'].split('.')[-1]
         self['full_name'] = '/'.join([self['artist'], self['album'], self['title']])
+        self['size'] = os.path.getsize(self['path'])
 
     def is_in(self, collection):
         f = collection.find({'_id': self['_id']})
@@ -56,8 +57,12 @@ def populate(drop_first=False, music_path=None, verbose=None):
         if verbose: print "Creating index '%s'" % (k)
         clxn.create_index(k)
 
-def purge:
-    pass
+def purge(verbose=False):
+    results = clxn.find()
+    for res in list(results):
+        if not os.path.exists(res['path']):
+            if verbose: print "Deleting '%s'" % res['path']
+            clxn.remove(res["_id"])
 
 yamlpath = 'config/config.yaml'
 f = open(yamlpath, 'r')
@@ -71,9 +76,13 @@ clxn = db[d['collection']]
 
 if __name__ == '__main__':
     from options import options
-    if options.action == "update":
-        drop_first = False
-    if options.action == "scratch":
-        drop_first = True
 
-    populate(drop_first=drop_first, music_path=options.music_path, verbose=options.verbose)
+    if options.action == "update":
+        populate(drop_first=False, music_path=options.music_path, verbose=options.verbose)
+        purge(verbose=options.verbose)
+
+    if options.action == "scratch":
+        populate(drop_first=True, music_path=options.music_path, verbose=options.verbose)
+
+    if options.action == "purge":
+        purge(verbose=options.verbose)

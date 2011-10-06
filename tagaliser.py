@@ -52,6 +52,7 @@ def populate(drop_first=False, music_path=None, verbose=None):
                 track = Track(os.path.join(d[0], t), verbose)
                 track.store(clxn)
 
+def index(verbose=None):
     t = clxn.find_one()
     for k in t.keys():
         if verbose: print "Creating index '%s'" % (k)
@@ -86,3 +87,7 @@ if __name__ == '__main__':
 
     if options.action == "purge":
         purge(verbose=options.verbose)
+
+    if options.action == "index":
+        index(verbose=options.verbose)
+

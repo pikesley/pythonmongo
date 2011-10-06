@@ -14,3 +14,5 @@ Tagaliser
 ---------
 
 Indexes your (properly tagged) mp3s/oggs in Mongo. Probably useful for something.
+
+`./tagaliser.py -h`

@@ -6,6 +6,7 @@ action_choices = [
     "scratch",
     "update",
     "purge",
+    "index",
 ]
 
 parser = argparse.ArgumentParser(
